@@ -32,3 +32,29 @@ hardened_mobs.register_rule("boss_mobs", {
 		return math.max(multiplier, 3.0)
 	end
 })
+
+-- Пример: Усиление по глубине
+hardened_mobs.register_rule("depth_rule", {
+    condition = function(pos, mob_def, rule)
+        return pos.y < -50  -- Условие: ниже -50
+    end,
+    apply = function(self, pos, mob_def, rule)
+        local depth = math.abs(math.min(pos.y, 0))
+        local multiplier = 1 + depth / 100  -- +1% за каждый блок глубины
+
+        self.health = self.health * multiplier
+        self.damage = self.damage * multiplier
+    end
+})
+
+-- Пример: Усиление по биому
+hardened_mobs.register_rule("biome_rule", {
+    condition = function(pos, mob_def, rule)
+        local biome = minetest.get_biome_name(minetest.get_biome_data(pos).biome)
+        return biome == "desert" or biome == "icesheet"
+    end,
+    apply = function(self, pos, mob_def, rule)
+        self.health = self.health * 1.5
+        self.walk_velocity = self.walk_velocity * 1.2
+    end
+})

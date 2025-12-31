@@ -1,10 +1,10 @@
+hardened_mobs = hardened_mobs or {}
 -- Hardened Mobs Configuration
 -- Modify these values to change the behavior
-
-config = {
+hardened_mobs.config = {
 	-- General settings
 	enabled = true,
-	global_multiplier = 1.0,
+	global_multiplier = 2.0,
 	min_multiplier = 0.5,
 	max_multiplier = 10.0,
 
@@ -61,3 +61,4 @@ config = {
 		-- ["mobs_animal:cow"] = true,
 	},
 }
+hardened_mobs.debug = true
