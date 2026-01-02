@@ -12,7 +12,7 @@ if io.open(rules_path, "r") then
 end
 
 -- Обработчик для всех мобов
-local process_interval = 5.0  -- Раз в 5 секунд вместо 0.5
+local process_interval = 5.0
 local last_process_time = 0
 
 minetest.register_globalstep(function(dtime)
@@ -29,7 +29,6 @@ minetest.register_globalstep(function(dtime)
     for _, player in ipairs(minetest.get_connected_players()) do
         local pos = player:get_pos()
         if pos then
-            -- Уменьшить радиус проверки
             local objects = minetest.get_objects_inside_radius(pos, 50)
             for _, obj in ipairs(objects) do
                 local luaentity = obj:get_luaentity()
@@ -37,13 +36,14 @@ minetest.register_globalstep(function(dtime)
                     -- Пропускаем уже обработанных мобов
                     if not luaentity._hardened_mobs_applied then
                         local mobname = luaentity.name
-                        -- Быстрая проверка по имени, чтобы исключить не-мобов
-                        --if mobname and (mobname:find("mobs_") or mobname:find("animal") or --mobname:find("monster")) then
+
+                        -- Быстрая предварительная фильтрация
+                        if mobname and not mobname:find("^__builtin:") and mobname ~= "player" then
                             local mob_pos = obj:get_pos()
                             if mob_pos then
                                 hardened_mobs.harden_mob(obj, mob_pos)
                             end
-                        --end
+                        end
                     end
                 end
             end

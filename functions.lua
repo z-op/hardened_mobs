@@ -5,6 +5,20 @@ local function should_harden(mobname)
         return false
     end
 
+    if not mobname or mobname == "" then
+        return false
+    end
+
+    -- Skip builtin entities (items, falling nodes, etc.)
+    if mobname:find("^__builtin:") then
+        return false
+    end
+
+    -- Skip specific non-mob entities
+    if mobname == "player" or mobname == "entities:item" then
+        return false
+    end
+
     -- Check whitelist (if not empty, only whitelisted mobs are affected)
     if next(hardened_mobs.config.mob_whitelist or {}) ~= nil then
         return (hardened_mobs.config.mob_whitelist or {})[mobname] == true
@@ -77,7 +91,7 @@ local function apply_effects(entity, multiplier)
     if hardened_mobs.config.show_particles and multiplier > 1.5 then
         minetest.add_particlespawner({
             amount = 6,
-            time = 0.1,
+            time = 2.0,
             minpos = {x=-0.5, y=0, z=-0.5},
             maxpos = {x=0.5, y=2, z=0.5},
             minvel = {x=-1, y=2, z=-1},
@@ -116,13 +130,6 @@ function hardened_mobs.harden_mob(entity, pos)
         return
     end
 
-
-    -- ЗАЩИТА: проверяем, не обрабатывается ли уже этот моб
-    if luaentity._hardened_mobs_processing then
-        return
-    end
-    luaentity._hardened_mobs_processing = true
-
     local mobname = luaentity.name
 
     -- Check if mob should be hardened
@@ -130,8 +137,17 @@ function hardened_mobs.harden_mob(entity, pos)
         return
     end
 
-    -- Check if mob has already been hardened
+    -- Check if mob has already been proceed
     if luaentity._hardened_mobs_applied then
+        return
+    end
+
+    -- Дополнительная проверка: если нет здоровья, это не моб
+    -- Но будем осторожны: некоторые мобы могут иметь health = 0
+    if luaentity.health == nil then
+        if hardened_mobs.debug then
+            minetest.log("action", "[hardened_mobs] Skipping entity without health property: " .. mobname)
+        end
         return
     end
 
@@ -160,7 +176,6 @@ function hardened_mobs.harden_mob(entity, pos)
     end
 
     -- Apply hardening
-    if multiplier ~= 1.0 then
         -- Store original values if not already stored
         if not luaentity._hardened_mobs_original then
             luaentity._hardened_mobs_original = {}
@@ -274,12 +289,10 @@ function hardened_mobs.harden_mob(entity, pos)
                 luaentity.hp_max or "nil"
             ))
 
-            minetest.log("action", "[hardened_mobs] Hardened " .. mobname ..
+            minetest.log("action", "[hardened_mobs] Proceed " .. mobname ..
                         " at " .. minetest.pos_to_string(pos) ..
                         " with multiplier " .. multiplier)
         end
-    end
-    luaentity._hardened_mobs_processing = nil
 end
 
 -- API functions
