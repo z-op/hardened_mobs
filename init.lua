@@ -12,22 +12,38 @@ if io.open(rules_path, "r") then
 end
 
 -- Обработчик для всех мобов
-minetest.register_globalstep(function(dtime)
-    hardened_mobs.globalstep_timer = (hardened_mobs.globalstep_timer or 0) + dtime
-    if hardened_mobs.globalstep_timer > 0.5 then  -- Check more frequently
-        hardened_mobs.globalstep_timer = 0
+local process_interval = 5.0  -- Раз в 5 секунд вместо 0.5
+local last_process_time = 0
 
-        for _, player in ipairs(minetest.get_connected_players()) do
-            local pos = player:get_pos()
-            if pos then
-                local objects = minetest.get_objects_inside_radius(pos, 150)  -- Increased radius
-                for _, obj in ipairs(objects) do
-                    local entity = obj:get_luaentity()
-                    if entity and entity._cmi_is_mob and not entity._hardened_mobs_applied then
-                        local mob_pos = obj:get_pos()
-                        if mob_pos then
-                            hardened_mobs.harden_mob(obj, mob_pos)
-                        end
+minetest.register_globalstep(function(dtime)
+    last_process_time = last_process_time + dtime
+    if last_process_time < process_interval then
+        return
+    end
+    last_process_time = 0
+
+    if not hardened_mobs.config.enabled then
+        return
+    end
+
+    for _, player in ipairs(minetest.get_connected_players()) do
+        local pos = player:get_pos()
+        if pos then
+            -- Уменьшить радиус проверки
+            local objects = minetest.get_objects_inside_radius(pos, 50)
+            for _, obj in ipairs(objects) do
+                local luaentity = obj:get_luaentity()
+                if luaentity and luaentity.name then
+                    -- Пропускаем уже обработанных мобов
+                    if not luaentity._hardened_mobs_applied then
+                        local mobname = luaentity.name
+                        -- Быстрая проверка по имени, чтобы исключить не-мобов
+                        --if mobname and (mobname:find("mobs_") or mobname:find("animal") or --mobname:find("monster")) then
+                            local mob_pos = obj:get_pos()
+                            if mob_pos then
+                                hardened_mobs.harden_mob(obj, mob_pos)
+                            end
+                        --end
                     end
                 end
             end

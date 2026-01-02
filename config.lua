@@ -6,7 +6,7 @@ hardened_mobs.config = {
 	enabled = true,
 	global_multiplier = 2.0,
 	min_multiplier = 0.5,
-	max_multiplier = 10.0,
+	max_multiplier = 20.0,
 
 	-- Depth scaling (Y coordinate)
 	depth_enabled = true,

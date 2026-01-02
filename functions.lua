@@ -116,6 +116,13 @@ function hardened_mobs.harden_mob(entity, pos)
         return
     end
 
+
+    -- ЗАЩИТА: проверяем, не обрабатывается ли уже этот моб
+    if luaentity._hardened_mobs_processing then
+        return
+    end
+    luaentity._hardened_mobs_processing = true
+
     local mobname = luaentity.name
 
     -- Check if mob should be hardened
@@ -272,6 +279,7 @@ function hardened_mobs.harden_mob(entity, pos)
                         " with multiplier " .. multiplier)
         end
     end
+    luaentity._hardened_mobs_processing = nil
 end
 
 -- API functions
