@@ -142,8 +142,6 @@ function hardened_mobs.harden_mob(entity, pos)
         return
     end
 
-    -- Дополнительная проверка: если нет здоровья, это не моб
-    -- Но будем осторожны: некоторые мобы могут иметь health = 0
     if luaentity.health == nil then
         if hardened_mobs.debug then
             minetest.log("action", "[hardened_mobs] Skipping entity without health property: " .. mobname)

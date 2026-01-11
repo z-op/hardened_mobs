@@ -61,4 +61,4 @@ hardened_mobs.config = {
 		-- ["mobs_animal:cow"] = true,
 	},
 }
-hardened_mobs.debug = true
+hardened_mobs.debug = false
